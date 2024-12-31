@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:r_pod/providers/cart_provider.dart';
 import 'package:r_pod/providers/products_provider.dart';
 import 'package:r_pod/shared/cart_icon.dart';
 
@@ -9,7 +10,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     //using watch provides changes when data is updated
-    final allProducs = ref.watch(productsProvider);
+    final allProducts = ref.watch(productsProvider);
+    final catProducts = ref.watch(cartNotifierProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Garage Sale Products'),
@@ -18,7 +20,7 @@ class HomeScreen extends ConsumerWidget {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: GridView.builder(
-          itemCount: allProducs.length,
+          itemCount: allProducts.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             mainAxisSpacing: 20,
@@ -33,12 +35,29 @@ class HomeScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset(
-                    allProducs[index].image,
+                    allProducts[index].image,
                     width: 60,
                     height: 60,
                   ),
-                  Text(allProducs[index].title),
-                  Text('GHS: ${allProducs[index].price}')
+                  Text(allProducts[index].title),
+                  Text('GHS: ${allProducts[index].price}'),
+                  if (catProducts.contains(allProducts[index]))
+                    TextButton(
+                        onPressed: () {
+                          ref
+                              .read(cartNotifierProvider.notifier)
+                              .removeProducts(allProducts[index]);
+                        },
+                        child: Text('Remove')),
+                  //
+                  if (!catProducts.contains(allProducts[index]))
+                    TextButton(
+                        onPressed: () {
+                          ref
+                              .read(cartNotifierProvider.notifier)
+                              .addProduct(allProducts[index]);
+                        },
+                        child: Text('Add to cart'))
                 ],
               ),
             );
